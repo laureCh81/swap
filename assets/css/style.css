@@ -1,0 +1,25 @@
+
+body{
+    min-height: 75rem;
+    padding-top: 4.5rem;    
+}
+nav,footer{
+    background-color: #e3f2fd;
+    color: #908da5;
+   
+}
+p,h1{
+    color: #046576;
+}
+.btn{
+    background-color: #046576;
+    color: #e3f2fd;
+}
+
+.connect{
+    margin-top: 7rem;
+}
+
+footer{
+    margin-top: 25rem;
+}
