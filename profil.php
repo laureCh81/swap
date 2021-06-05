@@ -14,7 +14,7 @@ $ville = '';
 $pays = '';
 
 
-var_dump($_POST);
+
 
 if (isset($_POST['telephone']) && isset($_POST['email']) && isset($_POST['adresse']) && isset($_POST['cp']) && isset($_POST['ville']) && isset($_POST['pays'])) {
     $telephone =  trim($_POST['telephone']);
