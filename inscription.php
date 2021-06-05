@@ -13,6 +13,10 @@ $prenom = '';
 $telephone =  '';
 $email = '';
 $civilite = '';
+$adresse = '';
+$cp = '';
+$ville = '';
+$pays = '';
 
 
 if (isset($_POST['pseudo']) && isset($_POST['mdp']) && isset($_POST['nom']) && isset($_POST['prenom']) && isset($_POST['telephone']) && isset($_POST['email']) && isset($_POST['civilite'])) {
@@ -22,7 +26,7 @@ if (isset($_POST['pseudo']) && isset($_POST['mdp']) && isset($_POST['nom']) && i
     $prenom = trim($_POST['prenom']);
     $telephone =  trim($_POST['telephone']);
     $email = trim($_POST['email']);
-    $civilite = trim($_POST['civilite']);  
+    $civilite = trim($_POST['civilite']);
 
     $erreur = false;
     //nickname length
@@ -54,18 +58,18 @@ if (isset($_POST['pseudo']) && isset($_POST['mdp']) && isset($_POST['nom']) && i
         $erreur = true;
         $msg .= '<div class="alert alert-danger mb-3">Veuillez renseigner un mot de passe svp</div>';
     }
-      //telephone format
-      $verif_telephone = preg_match('#^0[1-68][0-9]{8}$#', $telephone);
-      if ($verif_telephone == false) {
-           $erreur = true;
-           $msg .= '<div class="alert alert-danger mb-3">Veuillez renseigner un numéro de téléphone valide svp</div>';
-       }
+    //telephone format
+    $verif_telephone = preg_match('#^0[1-68][0-9]{8}$#', $telephone);
+    if ($verif_telephone == false) {
+        $erreur = true;
+        $msg .= '<div class="alert alert-danger mb-3">Veuillez renseigner un numéro de téléphone valide svp</div>';
+    }
 
 
     //registration
     if ($erreur == false) {
         $mdp = password_hash($mdp, PASSWORD_DEFAULT);
-        $enregistrement = $pdo->prepare("INSERT INTO membre (pseudo, mdp, nom, prenom, telephone, email, civilite, statut) VALUES (:pseudo, :mdp, :nom, :prenom, :telephone, :email, :civilite, 1)");
+        $enregistrement = $pdo->prepare("INSERT INTO membre (pseudo, mdp, nom, prenom, telephone, email, civilite, statut, adresse, cp, ville, pays) VALUES (:pseudo, :mdp, :nom, :prenom, :telephone, :email, :civilite, 1, '','','','')");
         $enregistrement->bindParam(':pseudo', $pseudo, PDO::PARAM_STR);
         $enregistrement->bindParam(':mdp', $mdp, PDO::PARAM_STR);
         $enregistrement->bindParam(':nom', $nom, PDO::PARAM_STR);
@@ -77,8 +81,6 @@ if (isset($_POST['pseudo']) && isset($_POST['mdp']) && isset($_POST['nom']) && i
 
         header('location:connexion.php');
     }
-
-    
 }
 
 include 'inc/header.inc.php';
@@ -119,9 +121,9 @@ include 'inc/nav.inc.php';
                         <label for="telephone" class="form-label">Téléphone <i class="fas fa-user-alt"></i></label>
                         <input type="text" class="form-control" id="telephone" name="telephone" value="<?php echo $telephone ?>">
                     </div>
-                
+
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email <i class="fas fa-user-alt"></i></label>
+                        <label for="email" class="form-label">Email <i class="fas fa-at"></i></label>
                         <input type="text" class="form-control" id="email" name="email" value="<?php echo $email ?>">
                     </div>
                 </div>
