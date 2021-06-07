@@ -3,15 +3,15 @@ include 'inc/init.inc.php';
 include 'inc/functions.inc.php';
 
 $pseudo = $_SESSION['membre']['pseudo'];
-$mdp = '';
-$nom = '';
-$prenom = '';
-$telephone =  '';
-$email = '';
-$adresse = '';
-$cp = '';
-$ville = '';
-$pays = '';
+// $mdp = '';
+// $nom = '';
+// $prenom = '';
+// $telephone =  '';
+// $email = '';
+// $adresse = '';
+// $cp = '';
+// $ville = '';
+// $pays = '';
 
 
 
@@ -80,6 +80,27 @@ if (isset($_POST['telephone']) && isset($_POST['email']) && isset($_POST['adress
         $msg .= '<div class="alert alert-success mb-3">Les modifications ont été enregistrées</div>';
     }
 }
+// modification mdp
+if (isset($_POST['mdp'])) {
+    $mdp = trim($_POST['mdp']);
+    $erreur = false;
+    if (iconv_strlen($_POST['mdp']) < 6 ) {
+        $erreur = true;
+        $msg .= '<p class="alert alert-danger mb-3">Attention le mot de passe doit contenir au moins 6 caractères.</p>';
+    }
+    if ($erreur == false) {
+        $mdp = password_hash($mdp, PASSWORD_DEFAULT);
+        $enregistrement = $pdo->prepare("UPDATE membre SET mdp = :mdp WHERE pseudo = '" . $pseudo . "'");
+        $enregistrement->bindParam(':mdp', $mdp, PDO::PARAM_STR);
+        $enregistrement->execute();
+        session_destroy();  
+        header('location:connexion.php');
+}
+}
+
+
+
+
 include 'inc/header.inc.php';
 include 'inc/nav.inc.php';
 ?>
@@ -109,8 +130,16 @@ include 'inc/nav.inc.php';
             <ul class="list-group list-group-flush">
                 <li class="list-group-item text-center">E-mail de contact : <?= $_SESSION["membre"]["email"] ?> </li>
                 <li class="list-group-item text-center">Téléphone : <?= $_SESSION["membre"]["telephone"] ?> </li>
-                <!-- <li class="list-group-item text-center">Adresse : <br> <?= $_SESSION["membre"]["adresse"] . '<br>' . $_SESSION["membre"]["cp"] . ' ' . $_SESSION["membre"]["ville"] . '<br>' . $_SESSION["membre"]["pays"] ?> </li> -->
+                <li class="list-group-item text-center">Adresse : <br>
+                    <?php if ($_SESSION["membre"]["adresse"] == '') {
+                        echo 'Non renseignée';
+                    } else {
+                        echo $_SESSION["membre"]["adresse"] . '<br>' . $_SESSION["membre"]["cp"] . ' ' . $_SESSION["membre"]["ville"] . '<br>' . $_SESSION["membre"]["pays"];
+                    } ?>
+                </li>
                 <li class="list-group-item text-center"> <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#coordonnees">Mettre a jour vos coordonnées</button>
+                </li>
+                <li class="list-group-item text-center"> <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#psw">Changer votre mot de passe</button>
                 </li>
             </ul>
         </div>
@@ -135,21 +164,20 @@ include 'inc/nav.inc.php';
                             </div>
                             <div class="form-group col-12">
                                 <label for="adresse">Adresse</label>
-                                <input type="text" class="form-control" id="adresse" name="adresse" placeholder="<?php echo $adresse ?>">
+                                <input type="text" class="form-control" id="adresse" name="adresse" placeholder="<?php echo $_SESSION['membre']['adresse'] ?>">
                             </div>
                             <div class="form-group col-3">
                                 <label for="cp">Code Postal</label>
-                                <input type="text" class="form-control" id="cp" name="cp" placeholder="<?php echo $cp ?>">
+                                <input type="text" class="form-control" id="cp" name="cp" placeholder="<?php echo $_SESSION['membre']['cp'] ?>">
                             </div>
                             <div class="form-group col-9">
                                 <label for="ville">Ville</label>
-                                <input type="text" class="form-control" id="ville" name="ville" placeholder="<?php echo $ville ?>">
+                                <input type="text" class="form-control" id="ville" name="ville" placeholder="<?php echo $_SESSION['membre']['ville'] ?>">
                             </div>
                             <div class="form-group col-12">
                                 <label for="pays">Pays</label>
-                                <input type="text" class="form-control" id="pays" name="pays" placeholder="<?php echo $pays ?>">
+                                <input type="text" class="form-control" id="pays" name="pays" placeholder="<?php echo $_SESSION['membre']['pays'] ?>">
                             </div>
-
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn closeWin" data-bs-dismiss="modal">Fermer</button>
@@ -159,8 +187,32 @@ include 'inc/nav.inc.php';
                 </div>
             </div>
         </div>
-
         <!-- modal update -->
+        <!-- modal update password -->
+        <div class="modal fade" id="psw" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header row">
+                        <h4 class="modal-title" id="ModalLabel">Changer votre mot de passe</h4>
+                        <p>Votre mot de passe doit avoir au moins 6 caractères</p>
+                        <hr><?php echo $msg; ?>
+                    </div>
+                    <div class="modal-body">
+                        <form id="profilForm" method="POST" action="" class="row">
+                            <div class="form-group col-12">
+                                <label for="mdp" class="form-label">Votre nouveau mot de passe</label>
+                                <input type="text" class="form-control" id="mdp" name="mdp">
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn closeWin" data-bs-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn" id="enregistrer" name="enregistrer">Enregistrer</button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- modal update password -->
 
         <div class="col-md-7 mt-3">
             <ul class="list-group list-group-flush">
