@@ -13,9 +13,11 @@ $pseudo = $_SESSION['membre']['pseudo'];
 // $ville = '';
 // $pays = '';
 
+// date inscription
+$date = $pdo->query("SELECT DATE_FORMAT(date_enregistrement, '%d/%m/%Y') AS date FROM membre WHERE pseudo = '" . $pseudo . "'");
+$inscription = $date->fetch(PDO::FETCH_ASSOC);
 
-
-
+//Formulaire coordonnées
 if (isset($_POST['telephone']) && isset($_POST['email']) && isset($_POST['adresse']) && isset($_POST['cp']) && isset($_POST['ville']) && isset($_POST['pays'])) {
     $telephone =  trim($_POST['telephone']);
     $email = trim($_POST['email']);
@@ -98,7 +100,8 @@ if (isset($_POST['mdp'])) {
 }
 }
 
-
+$coordonnes_req = $pdo->query("SELECT email AS email, telephone AS telephone, adresse AS adresse, cp AS cp, ville AS ville, pays AS pays FROM membre WHERE pseudo = '" . $pseudo . "'");
+$coordonnes = $coordonnes_req->fetch(PDO::FETCH_ASSOC);
 
 
 include 'inc/header.inc.php';
@@ -107,7 +110,8 @@ include 'inc/nav.inc.php';
 
 <main class="container">
     <div class="bg-light p-5 rounded ">
-        <h1 class="text-center"> Bienvenue <?php echo ucfirst($_SESSION['membre']['pseudo']); ?> <i class="far fa-user-circle"></i></h1>
+        <h1 class="text-center"> Bienvenue <?= ucfirst($_SESSION['membre']['pseudo']); ?> <i class="far fa-user-circle"></i></h1>
+        <p class="lead text-center">Membre depuis le <?= $inscription['date']; ?> </p>
         <p class="lead text-center">note
             <hr>
 
@@ -128,13 +132,13 @@ include 'inc/nav.inc.php';
             </div>
 
             <ul class="list-group list-group-flush">
-                <li class="list-group-item text-center">E-mail de contact : <?= $_SESSION["membre"]["email"] ?> </li>
-                <li class="list-group-item text-center">Téléphone : <?= $_SESSION["membre"]["telephone"] ?> </li>
+                <li class="list-group-item text-center">E-mail de contact : <?= $coordonnes['email'] ?> </li>
+                <li class="list-group-item text-center">Téléphone : <?= $coordonnes['telephone'] ?> </li>
                 <li class="list-group-item text-center">Adresse : <br>
-                    <?php if ($_SESSION["membre"]["adresse"] == '') {
+                    <?php if ($coordonnes['adresse'] == '') {
                         echo 'Non renseignée';
                     } else {
-                        echo $_SESSION["membre"]["adresse"] . '<br>' . $_SESSION["membre"]["cp"] . ' ' . $_SESSION["membre"]["ville"] . '<br>' . $_SESSION["membre"]["pays"];
+                        echo $coordonnes['adresse'] . '<br>' . $coordonnes['cp'] . ' ' . $coordonnes['ville'] . '<br>' . $coordonnes['pays'];
                     } ?>
                 </li>
                 <li class="list-group-item text-center"> <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#coordonnees">Mettre a jour vos coordonnées</button>
