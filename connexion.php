@@ -9,6 +9,9 @@ if (user_connected() == true) {
 } 
 
 $pseudo = '';
+
+
+
 // connection
 if (isset($_POST['pseudo']) && isset($_POST['mdp'])) {
     $pseudo = trim($_POST['pseudo']);
@@ -30,7 +33,18 @@ if (isset($_POST['pseudo']) && isset($_POST['mdp'])) {
             $_SESSION['membre']['email'] = $verif_mdp['email'];
             $_SESSION['membre']['civilite'] = $verif_mdp['civilite'];
             $_SESSION['membre']['statut'] = $verif_mdp['statut'];
-            header('location:index.php'); 
+            $_SESSION['membre']['adresse'] = $verif_mdp['adresse'];
+            $_SESSION['membre']['cp'] = $verif_mdp['cp'];
+            $_SESSION['membre']['ville'] = $verif_mdp['ville'];
+            $_SESSION['membre']['pays'] = $verif_mdp['pays'];
+            $_SESSION['membre']['date_enregistrement'] = $verif_mdp['date_enregistrement'];
+
+            if (isset($_GET['id_annonce'])) {
+                header('location:annonce.php?id_annonce='.$_GET['id_annonce']);
+            }else{
+                header('location:profil.php'); 
+            
+            }
             
         }else{
             $msg .= '<div class="alert alert-danger mb-3">Attention! Votre pseudo et/ou votre mot de passe est incorrect.</div>';
@@ -39,6 +53,9 @@ if (isset($_POST['pseudo']) && isset($_POST['mdp'])) {
         
         $msg .= '<div class="alert alert-danger mb-3">Attention! pseudo et/ou le mot de passe incorrect.</div>';
     }
+
+    
+    
 }
 
 include 'inc/header.inc.php'; 
@@ -61,7 +78,7 @@ include 'inc/nav.inc.php';
                 </div>
                 <div class="mb-3">
                     <label for="mdp" class="form-label">Mot de passe <i class="fas fa-key"></i></label>
-                    <input type="text" class="form-control" id="mdp" name="mdp">
+                    <input type="password" class="form-control" id="mdp" name="mdp">
                 </div>
                 <div class="mb-3 mt-4">
                     <button type="submit" class="btn btn-outline-secondary w-100" id="connexion" name="connexion"><i class="fas fa-keyboard"></i> Connexion <i class="fas fa-keyboard"></i></button>

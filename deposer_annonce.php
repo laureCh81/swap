@@ -23,7 +23,7 @@ $cp = '';
 $pays = '';
 
 
-$liste_categorie = $pdo->query("SELECT DISTINCT titre FROM categorie ORDER BY titre");
+$liste_categorie = $pdo->query("SELECT DISTINCT categorie FROM categorie ORDER BY categorie");
 
 
 if (isset($_POST['categorie']) && isset($_POST['titre']) && isset($_POST['desc_longue']) && isset($_POST['prix']) && isset($_POST['adresse']) && isset($_POST['cp']) && isset($_POST['ville']) && isset($_POST['pays'])) {
@@ -111,6 +111,7 @@ if (isset($_POST['categorie']) && isset($_POST['titre']) && isset($_POST['desc_l
     }
     //price
     if (!is_numeric($prix)) {
+        $erreur = true;
         $prix = 0;
         $msg .= '<div class="alert alert-danger mb-3">Attention! Le prix doit être renseigné .</div>';
     }
@@ -129,6 +130,12 @@ if (isset($_POST['categorie']) && isset($_POST['titre']) && isset($_POST['desc_l
     if ($verif_cp == false) {
         $erreur = true;
         $msg .= '<div class="alert alert-danger mb-3">Veuillez renseigner un code postal valide svp</div>';
+    }
+
+    // adresse
+    if ($adresse == '') {
+        $erreur = true;
+        $msg .= '<div class="alert alert-danger mb-3">Veuillez renseigner votre adresse svp</div>';
     }
 
     // annonce register;
@@ -166,14 +173,14 @@ if (isset($_POST['categorie']) && isset($_POST['titre']) && isset($_POST['desc_l
         $recupMembre = $pdo->query("SELECT id_membre as membre FROM membre WHERE pseudo = '" . $pseudo . "'");
         $membre = $recupMembre->fetch(PDO::FETCH_ASSOC);
 
-        $desc_courte = substr($desc_longue, 0, 25);
+        $desc_courte = substr($desc_longue, 0, 50);
 
-        $recupCategorie = $pdo->prepare("SELECT id_categorie AS categ FROM categorie WHERE titre = :categorie");
+        $recupCategorie = $pdo->prepare("SELECT id_categorie AS categ FROM categorie WHERE categorie = :categorie");
         $recupCategorie->bindParam(':categorie', $categorie, PDO::PARAM_STR);
         $recupCategorie->execute();
         $idCategorie = $recupCategorie->fetch(PDO::FETCH_ASSOC);
         $idCategorie = $idCategorie['categ'];
-
+        
 
         $enregistrement = $pdo->prepare("INSERT INTO annonce (titre, description_courte, description_longue, prix, photo, adresse, cp, ville, pays, membre_id, photo_id, categorie_id) VALUES (:titre, '" . $desc_courte . "', :desc_longue, :prix, '" . $photo_principale['photo1'] . "', :adresse, :cp, :ville, :pays, '" . $membre['membre'] . "', '" . $lastInsertID . "', '" . $idCategorie . "')");
         $enregistrement->bindParam(':titre', $titre, PDO::PARAM_STR);
@@ -230,7 +237,7 @@ include 'inc/nav.inc.php';
                         <div class="accordion-body">
                             <select class="form-control" id="categorie" name="categorie">
                                 <?php while ($categorie = $liste_categorie->fetch(PDO::FETCH_ASSOC)) {
-                                    $categorie = $categorie['titre'];
+                                    $categorie = $categorie['categorie'];
                                     echo '<option value="' . $categorie . '">' . $categorie . '</option>';
                                 }
 
@@ -310,10 +317,11 @@ include 'inc/nav.inc.php';
                         <div class="form-group col-3">
                             <label for="cp">Code Postal</label>
                             <input type="text" class="form-control" id="cp" name="cp" value="<?php echo $cp; ?>">
+                            <div style="display: none; color: #f55;" id="error-message"></div>
                         </div>
                         <div class="form-group col-9">
                             <label for="ville">Ville</label>
-                            <input type="text" class="form-control" id="ville" name="ville" value="<?php echo $ville; ?>">
+                            <select class="form-control " id="ville" name="ville" ></select>
                         </div>
                         <div class="form-group col-12">
                             <label for="pays">Pays</label>

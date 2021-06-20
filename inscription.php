@@ -98,7 +98,7 @@ include 'inc/nav.inc.php';
 
     <div class="row">
         <div class="col-12">
-            <form method="POST" action="" class="row">
+            <form method="POST" class="row">
                 <div class="col-sm-6">
                     <div class="mb-3">
                         <label for="civilite" class="form-label">Civilite <i class="fas fa-user-alt"></i></label>
@@ -132,11 +132,11 @@ include 'inc/nav.inc.php';
                 <div class="col-sm-6">
                     <div class="mb-3">
                         <label for="pseudo" class="form-label">Pseudo <i class="fas fa-user-alt"></i></label>
-                        <input type="text" class="form-control" id="pseudo" name="pseudo" value="<?php echo $pseudo ?>">
+                        <input type="text" class="form-control" id="pseudo" name="pseudo" minlength="6" required value="<?php echo $pseudo ?>">
                     </div>
                     <div class="mb-3">
                         <label for="mdp" class="form-label">Mot de passe <i class="fas fa-key"></i></label>
-                        <input type="text" class="form-control" id="mdp" name="mdp">
+                        <input type="password" class="form-control" id="mdp" name="mdp">
                     </div>
                     <div class="mb-3 mt-4">
                         <button type="submit" class="btn btn-outline-secondary w-100" id="enregistrer" name="enregistrer"><i class="fas fa-keyboard"></i> Inscription <i class="fas fa-keyboard"></i></button>
