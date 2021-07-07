@@ -22,7 +22,7 @@ if (!isset($_GET['id_annonce'])) {
 //Affichage des données de l'annonce
 //-----------------------------------------------
 
-$recupAnnonce = $pdo->prepare("SELECT DATE_FORMAT(date_enregistrement, '%d/%m/%Y') AS publication, titre AS titre, description_longue AS description, prix AS prix, cp AS cp, ville AS ville  FROM annonce WHERE id_annonce = :id_annonce");
+$recupAnnonce = $pdo->prepare("SELECT DATE_FORMAT(date_enregistrement, '%d/%m/%Y') AS publication, titre AS titre, description_longue AS description, prix AS prix, cp AS cp, ville AS ville FROM annonce WHERE id_annonce = :id_annonce");
 $recupAnnonce->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
 $recupAnnonce->execute();
 $donneesAnnonce = $recupAnnonce->fetch(PDO::FETCH_ASSOC);
@@ -44,10 +44,7 @@ $recupNote->execute();
 $tabNote = $recupNote->fetch(PDO::FETCH_ASSOC);
 settype($tabNote['note'], "int");
 
-//-----------------------------------------------
-// Google map
-//-------------------------------------------------
-// $recupGps = $pdo->prepare("");
+
 
 //-----------------------------------------------
 //Contact vendeur
@@ -133,7 +130,7 @@ if (isset($_POST['note']) && isset($_POST['commentaire'])) {
 
         $msg .= '<div class="alert alert-success mb-3">Votre avis à bien été pris en compte</div>';
     }
-    // header('location:annonce.php?id_annonce=' . $_GET['id_annonce']);
+    header('location:annonce.php?id_annonce=' . $_GET['id_annonce']);
 }
 
 //-----------------------------------------------
@@ -164,7 +161,7 @@ if (isset($_POST['question'])) {
     }
 }
 
-$recupQuestion = $pdo->prepare("SELECT id_question, question_id, question, reponse, DATE_FORMAT(question.date_enregistrement, '%d/%m/%Y') AS dateQ, DATE_FORMAT(reponse.date_enregistrement, '%d/%m/%Y') AS dateR FROM question LEFT JOIN reponse ON id_question = question_id WHERE annonce_id = :id_annonce ORDER BY id_question DESC;;");
+$recupQuestion = $pdo->prepare("SELECT id_question, question_id, question, reponse, DATE_FORMAT(question.date_enregistrement, '%d/%m/%Y') AS dateQ, DATE_FORMAT(reponse.date_enregistrement, '%d/%m/%Y') AS dateR FROM question LEFT JOIN reponse ON id_question = question_id WHERE annonce_id = :id_annonce ORDER BY id_question DESC");
 $recupQuestion->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
 $recupQuestion->execute();
 
@@ -291,10 +288,8 @@ include 'inc/nav.inc.php';
         </div>
         <div class="row">
             <div class="col-lg-6 col-sm-12 mt-5">
-                <!-- <div id="map" class="col-lg-6 col-sm-12 mt-3">
-            <iframe width="500" height="430" style="border:0" loading="lazy" allowfullscreen src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDZYK1Pyy_7BIUqmB0EpJ6mXj482SgAvXs&q=Space+Needle,Seattle+WA">
-            </iframe>
-        </div> -->
+                <iframe width="450" height="250" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCB3c5bwe1YQDtC0j32ppdwnkmofc8mZRU&q=<?php echo $donneesAnnonce['cp']; ?>+France" allowfullscreen>
+                </iframe>
             </div>
             <div class="col-lg-6 col-sm-12 mt-5">
                 <?php
@@ -309,7 +304,7 @@ include 'inc/nav.inc.php';
             </div>
         </div>
         <div class="mt-5">
-            <h5>Autres annonces</h5>
+            <h5>Autres annonces dans cette catégorie</h5>
             <div class="row p-5 align-items-center ">
                 <?php
 

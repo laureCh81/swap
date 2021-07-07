@@ -127,8 +127,6 @@ include 'inc/nav.inc.php';
                         <input type="text" class="form-control" id="email" name="email" value="<?php echo $email ?>">
                     </div>
                 </div>
-
-
                 <div class="col-sm-6">
                     <div class="mb-3">
                         <label for="pseudo" class="form-label">Pseudo <i class="fas fa-user-alt"></i></label>

@@ -321,7 +321,7 @@ include 'inc/nav.inc.php';
                         </div>
                         <div class="form-group col-9">
                             <label for="ville">Ville</label>
-                            <select class="form-control " id="ville" name="ville" ></select>
+                            <select class="form-control" id="ville" name="ville" value="<?php echo $ville; ?>"></select>
                         </div>
                         <div class="form-group col-12">
                             <label for="pays">Pays</label>
