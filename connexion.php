@@ -1,12 +1,12 @@
-<?php 
+<?php
 include 'inc/init.inc.php';
 include 'inc/functions.inc.php';
 //disconnect
 
 
 if (user_connected() == true) {
-    header('location:profil.php');   
-} 
+    header('location:profil.php');
+}
 
 $pseudo = '';
 
@@ -16,7 +16,7 @@ $pseudo = '';
 if (isset($_POST['pseudo']) && isset($_POST['mdp'])) {
     $pseudo = trim($_POST['pseudo']);
     $mdp = trim($_POST['mdp']);
-    
+
     $connexion = $pdo->prepare("SELECT * FROM membre WHERE pseudo = :pseudo");
     $connexion->bindParam(':pseudo', $pseudo, PDO::PARAM_STR);
     $connexion->execute();
@@ -40,33 +40,28 @@ if (isset($_POST['pseudo']) && isset($_POST['mdp'])) {
             $_SESSION['membre']['date_enregistrement'] = $verif_mdp['date_enregistrement'];
 
             if (isset($_GET['id_annonce'])) {
-                header('location:annonce.php?id_annonce='.$_GET['id_annonce']);
-            }else{
-                header('location:profil.php'); 
-            
+                header('location:annonce.php?id_annonce=' . $_GET['id_annonce']);
+            } else {
+                header('location:profil.php');
             }
-            
-        }else{
+        } else {
             $msg .= '<div class="alert alert-danger mb-3">Attention! Votre pseudo et/ou votre mot de passe est incorrect.</div>';
         }
-    }else {
-        
+    } else {
+
         $msg .= '<div class="alert alert-danger mb-3">Attention! pseudo et/ou le mot de passe incorrect.</div>';
     }
-
-    
-    
 }
 
-include 'inc/header.inc.php'; 
+include 'inc/header.inc.php';
 include 'inc/nav.inc.php';
 ?>
 
 <main class="container ">
     <div class="bg-light p-5 rounded mb-5">
         <h1 class="text-center">Bonjour ! </h1>
-        <p class="lead text-center"> Connectez-vous pour découvrir toutes nos fonctionnalités.  <i class="fas fa-sign-in-alt"></i>
-            <hr> <?php echo $msg ?>            
+        <p class="lead text-center"> Connectez-vous pour découvrir toutes nos fonctionnalités. <i class="fas fa-sign-in-alt"></i>
+            <hr> <?php echo $msg ?>
         </p>
     </div>
     <form method="POST" class="connect row">
@@ -84,13 +79,14 @@ include 'inc/nav.inc.php';
                     <button type="submit" class="btn btn-outline-secondary w-100" id="connexion" name="connexion"><i class="fas fa-keyboard"></i> Connexion <i class="fas fa-keyboard"></i></button>
                 </div>
                 <div class="mb-3 mt-4">
-                <p class="text-center">Envie de nous rejoindre ? <br>
-                <a href="<?php echo URL; ?>inscription.php">Créer un compte</a></p>
+                    <p class="text-center">Envie de nous rejoindre ? <br>
+                        <a href="<?php echo URL; ?>inscription.php">Créer un compte</a>
+                    </p>
                 </div>
             </div>
         </div>
     </form>
 </main>
 
-<?php 
+<?php
 include 'inc/footer.inc.php';

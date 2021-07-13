@@ -6,19 +6,20 @@ if (isset($_GET['action']) && $_GET['action'] == 'deconnexion') {
     session_destroy();
     header('location:index.php');
 }
+
+
 // range
 $range = $pdo->query("SELECT prix FROM annonce ORDER BY prix DESC LIMIT 1");
 $rangeMax = $range->fetch(PDO::FETCH_ASSOC);
-settype($rangeMax['prix'], "int");
 settype($_GET['prix'], "int");
 
 
 
 // Affichage annonce 
-$annonce = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce ORDER BY id_annonce DESC LIMIT 20");
-$annonce1 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce ORDER BY id_annonce ASC LIMIT 20");
-$annonce2 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce ORDER BY prix ASC LIMIT 20");
-$annonce3 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce ORDER BY prix DESC LIMIT 20");
+$annonce = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce ORDER BY id_annonce DESC ");
+$annonce1 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce ORDER BY id_annonce ASC ");
+$annonce2 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce ORDER BY prix ASC ");
+$annonce3 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce ORDER BY prix DESC ");
 
 $liste_membre = $pdo->query("SELECT DISTINCT pseudo FROM membre ORDER BY pseudo");
 $liste_categorie = $pdo->query("SELECT DISTINCT categorie FROM categorie ORDER BY categorie");
@@ -28,142 +29,143 @@ $recupCategorie->bindParam(':categorie', $_GET["categorie"], PDO::PARAM_STR);
 $recupCategorie->execute();
 $categ = $recupCategorie->fetch(PDO::FETCH_ASSOC);
 
+// affichage recherche 
+if (isset($_GET['recherche']) && $_GET['recherche'] != '') {   
+    $recherche=htmlspecialchars($_GET['recherche']);    
+    $annonce = $pdo->query("SELECT DISTINCT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM categorie, annonce WHERE
+    titre LIKE '%".$recherche."%' OR description_longue LIKE '%".$recherche."%' OR categorie_id IN (SELECT id_categorie FROM categorie WHERE motcles LIKE '%".$recherche."%') ORDER BY id_annonce DESC");
+    $annonce1 = $pdo->query("SELECT DISTINCT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM categorie, annonce WHERE
+    titre LIKE '%".$recherche."%' OR description_longue LIKE '%".$recherche."%' OR categorie_id IN (SELECT id_categorie FROM categorie WHERE motcles LIKE '%".$recherche."%') ORDER BY id_annonce ASC");
+    $annonce2 = $pdo->query("SELECT DISTINCT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM categorie, annonce WHERE
+    titre LIKE '%".$recherche."%' OR description_longue LIKE '%".$recherche."%' OR categorie_id IN (SELECT id_categorie FROM categorie WHERE motcles LIKE '%".$recherche."%') ORDER BY prix ASC");
+    $annonce3 = $pdo->query("SELECT DISTINCT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM categorie, annonce WHERE
+    titre LIKE '%".$recherche."%' OR description_longue LIKE '%".$recherche."%' OR categorie_id IN (SELECT id_categorie FROM categorie WHERE motcles LIKE '%".$recherche."%') ORDER BY prix DESC");  
+}
 
-    if (isset($_GET['categorie']) && $_GET['categorie'] != 'tous') {
-        if ($_GET['region'] != 'tous' && $_GET['membre'] == 'tous') {
-            $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY id_annonce DESC LIMIT 20");
-            $annonce->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce->execute();
-            $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY id_annonce ASC LIMIT 20");
-            $annonce1->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce1->execute();
-            $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY prix ASC LIMIT 20");
-            $annonce2->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce2->execute();
-            $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY prix DESC LIMIT 20");
-            $annonce3->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce3->execute();
-           
-        } elseif ($_GET['region'] != 'tous' && $_GET['membre'] != 'tous') {
-            $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce DESC LIMIT 20");
-            $annonce->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce->execute();
-            $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY id_annonce ASC LIMIT 20");
-            $annonce1->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce1->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce1->execute();
-            $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY prix ASC LIMIT 20");
-            $annonce2->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce2->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce2->execute();
-            $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY prix DESC LIMIT 20");
-            $annonce3->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce3->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce3->execute();
-            
-        } elseif ($_GET['region'] != 'tous' && $_GET['membre'] != 'tous') {
-            $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce DESC LIMIT 20");
-            $annonce->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);            
-            $annonce->execute();
-            $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY id_annonce ASC LIMIT 20");
-            $annonce1->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce1->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce1->execute();
-            $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY prix ASC LIMIT 20");
-            $annonce2->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce2->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce2->execute();
-            $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY prix DESC LIMIT 20");
-            $annonce3->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce3->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce3->execute();
-            
-        } else {
-            $annonce = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' ORDER BY id_annonce DESC LIMIT 20");
-            $annonce1 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' ORDER BY id_annonce ASC LIMIT 20");
-            $annonce2 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' ORDER BY prix ASC LIMIT 20");
-            $annonce3 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' ORDER BY prix DESC LIMIT 20");
-            
-        }
-    }
+// Filtres
+if (isset($_GET['categorie']) && $_GET['categorie'] != 'tous') {
 
-
-    if (isset($_GET['region']) && $_GET['region'] != 'tous') {
-        if ($_GET['membre'] != 'tous' && $_GET['categorie'] == 'tous') {
-            $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce DESC LIMIT 20");
-            $annonce->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce->execute();
-            $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce ORDER BY id_annonce ASC LIMIT 20");
-            $annonce1->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce1->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce1->execute();
-            $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce ORDER BY prix ASC LIMIT 20");
-            $annonce2->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce2->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce2->execute();
-            $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce ORDER BY prix DESC LIMIT 20");
-            $annonce3->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce3->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce3->execute();
-            
-        } else {
-            $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY id_annonce DESC LIMIT 20");
-            $annonce->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce->execute();
-            $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY id_annonce ASC LIMIT 20");
-            $annonce1->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce1->execute();
-            $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY prix ASC LIMIT 20");
-            $annonce2->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce2->execute();
-            $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY prix DESC LIMIT 20");
-            $annonce3->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
-            $annonce3->execute();
-            
-        }
+    if ($_GET['region'] != 'tous' && $_GET['membre'] == 'tous') {       
+        $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY id_annonce DESC ");
+        $annonce->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce->execute();
+        $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY id_annonce ASC ");
+        $annonce1->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce1->execute();
+        $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY prix ASC ");
+        $annonce2->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce2->execute();
+        $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY prix DESC ");
+        $annonce3->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce3->execute();
+    } elseif ($_GET['region'] != 'tous' && $_GET['membre'] != 'tous') {
+        $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce DESC ");
+        $annonce->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce->execute();
+        $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY id_annonce ASC ");
+        $annonce1->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce1->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce1->execute();
+        $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY prix ASC ");
+        $annonce2->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce2->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce2->execute();
+        $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY prix DESC ");
+        $annonce3->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce3->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce3->execute();
+    } elseif ($_GET['region'] != 'tous' && $_GET['membre'] != 'tous') {
+        $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce DESC ");
+        $annonce->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce->execute();
+        $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY id_annonce ASC ");
+        $annonce1->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce1->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce1->execute();
+        $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY prix ASC ");
+        $annonce2->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce2->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce2->execute();
+        $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' AND SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo)  ORDER BY prix DESC ");
+        $annonce3->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce3->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce3->execute();
+    } else {
+        $annonce = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' ORDER BY id_annonce DESC ");
+        $annonce1 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' ORDER BY id_annonce ASC ");
+        $annonce2 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' ORDER BY prix ASC ");
+        $annonce3 = $pdo->query("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE categorie_id = '" . $categ['categ'] . "' ORDER BY prix DESC ");
     }
-
-    if (isset($_GET['membre']) && $_GET['membre'] != 'tous') {
-        if ($_GET['categorie'] != 'tous' && $_GET['region'] == 'tous') {
-            $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) AND categorie_id IN (SELECT id_categorie FROM categorie WHERE categorie = :categorie) ORDER BY id_annonce DESC LIMIT 20");
-            $annonce->bindParam(':categorie', $_GET['categorie'], PDO::PARAM_STR);
-            $annonce->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce->execute();
-            $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) AND categorie_id IN (SELECT id_categorie FROM categorie WHERE categorie = :categorie) ORDER BY id_annonce ASC LIMIT 20");
-            $annonce1->bindParam(':categorie', $_GET['categorie'], PDO::PARAM_STR);
-            $annonce1->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce1->execute();
-            $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) AND categorie_id IN (SELECT id_categorie FROM categorie WHERE categorie = :categorie) ORDER BY prix ASC LIMIT 20");
-            $annonce2->bindParam(':categorie', $_GET['categorie'], PDO::PARAM_STR);
-            $annonce2->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce2->execute();
-            $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) AND categorie_id IN (SELECT id_categorie FROM categorie WHERE categorie = :categorie) ORDER BY prix DESC LIMIT 20");
-            $annonce3->bindParam(':categorie', $_GET['categorie'], PDO::PARAM_STR);
-            $annonce3->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce3->execute();
-            
-        } else {
-            $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce DESC LIMIT 20");
-            $annonce->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce->execute();
-            $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce ASC LIMIT 20");
-            $annonce1->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce1->execute();
-            $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY prix ASC LIMIT 20");
-            $annonce2->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce2->execute();
-            $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY prix DESC LIMIT 20");
-            $annonce3->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
-            $annonce3->execute();
-            
-        }
+} elseif (isset($_GET['region']) && $_GET['region'] != 'tous') {
+    if ($_GET['membre'] != 'tous' && $_GET['categorie'] == 'tous') {
+        $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce DESC ");
+        $annonce->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce->execute();
+        $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce ORDER BY id_annonce ASC ");
+        $annonce1->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce1->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce1->execute();
+        $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce ORDER BY prix ASC ");
+        $annonce2->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce2->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce2->execute();
+        $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) AND membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce ORDER BY prix DESC ");
+        $annonce3->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce3->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce3->execute();
+    } else {
+        $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY id_annonce DESC ");
+        $annonce->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce->execute();
+        $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY id_annonce ASC ");
+        $annonce1->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce1->execute();
+        $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY prix ASC ");
+        $annonce2->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce2->execute();
+        $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE SUBSTR(cp, 1, 2) IN (SELECT num_dep AS cp FROM departements_region WHERE region = :region) ORDER BY prix DESC ");
+        $annonce3->bindParam(':region', $_GET['region'], PDO::PARAM_STR);
+        $annonce3->execute();
     }
-    if ($annonce->rowCount() < 1 || $annonce2->rowCount() < 1 || $annonce3->rowCount() < 1) {
-        $msg .= '<div class="alert alert-danger mb-3">Aucune annonce ne correspond à votre recherche</div>';
+} elseif (isset($_GET['membre']) && $_GET['membre'] != 'tous') {
+    if ($_GET['categorie'] != 'tous' && $_GET['region'] == 'tous') {
+        $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) AND categorie_id IN (SELECT id_categorie FROM categorie WHERE categorie = :categorie) ORDER BY id_annonce DESC ");
+        $annonce->bindParam(':categorie', $_GET['categorie'], PDO::PARAM_STR);
+        $annonce->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce->execute();
+        $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) AND categorie_id IN (SELECT id_categorie FROM categorie WHERE categorie = :categorie) ORDER BY id_annonce ASC ");
+        $annonce1->bindParam(':categorie', $_GET['categorie'], PDO::PARAM_STR);
+        $annonce1->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce1->execute();
+        $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) AND categorie_id IN (SELECT id_categorie FROM categorie WHERE categorie = :categorie) ORDER BY prix ASC ");
+        $annonce2->bindParam(':categorie', $_GET['categorie'], PDO::PARAM_STR);
+        $annonce2->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce2->execute();
+        $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) AND categorie_id IN (SELECT id_categorie FROM categorie WHERE categorie = :categorie) ORDER BY prix DESC ");
+        $annonce3->bindParam(':categorie', $_GET['categorie'], PDO::PARAM_STR);
+        $annonce3->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce3->execute();
+    } else {
+        $annonce = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce DESC ");
+        $annonce->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce->execute();
+        $annonce1 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY id_annonce ASC ");
+        $annonce1->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce1->execute();
+        $annonce2 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY prix ASC ");
+        $annonce2->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce2->execute();
+        $annonce3 = $pdo->prepare("SELECT photo, titre, description_courte AS description, prix, id_annonce, membre_id FROM annonce WHERE membre_id IN (SELECT id_membre FROM membre WHERE pseudo = :pseudo) ORDER BY prix DESC ");
+        $annonce3->bindParam(':pseudo', $_GET['membre'], PDO::PARAM_STR);
+        $annonce3->execute();
     }
+}
+if ($annonce->rowCount() < 1 || $annonce2->rowCount() < 1 || $annonce3->rowCount() < 1) {
+    $msg .= '<div class="alert alert-danger mb-3">Aucune annonce ne correspond à votre recherche</div>';
+}
 
 
 include 'inc/header.inc.php';
@@ -173,7 +175,7 @@ include 'inc/nav.inc.php';
 <main class="container">
 
     <div class="bg-light p-5 rounded ">
-        <h1 class="text-center">Bienvenue sur Swap <img src="<?php echo URL;?>assets/img/logo.png" alt="logo swap" width="5%"></h1>
+        <h1 class="text-center">Bienvenue sur Swap <img src="<?php echo URL; ?>assets/img/logo.png" alt="logo swap" width="5%"></h1>
         <p class="lead text-center">La nouvelle plateforme de vente entre particuliers
             <hr>
         </p>
@@ -181,7 +183,7 @@ include 'inc/nav.inc.php';
 
     <div class="row">
         <div class="col-lg-4 col-sm-12 mt-5">
-            <form method="GET" action="#">
+            <form method="GET" >
                 <div class="me-5">
                     <label for="triCateg">Catégorie</label>
                     <select name="categorie" id="triCateg" class="form-select" aria-label="TriParCateg">
@@ -260,12 +262,13 @@ include 'inc/nav.inc.php';
                 <?php
                 echo $msg;
                 while ($liste_annonces = $annonce->fetch(PDO::FETCH_ASSOC)) {
+                   
                     echo '<div class="row">';
                     foreach ($liste_annonces as $indice => $valeur) {
                         if ($indice == 'photo') {
                             echo '<div class="col-4"><a href="annonce.php?id_annonce=' . $liste_annonces['id_annonce'] . '"><img src="' . URL . 'assets/img/' . $valeur . '"  class="img-fluid" alt="image annonce"></a></div>';
                         } elseif ($indice == 'titre') {
-                            echo '<div class="col-8"><h5>' . $valeur . '</h5>';
+                            echo '<div class="col-8"><a class ="link-dark nounderline" href="annonce.php?id_annonce=' . $liste_annonces['id_annonce'] . '"><h5>' . $valeur . '</h5></a>';
                         } elseif ($indice == 'prix') {
                             echo '<p class="text-end">' . $valeur . ' €</p>';
                         } elseif ($indice == 'description') {
@@ -424,8 +427,6 @@ include 'inc/nav.inc.php';
 
                 ?>
             </div>
-            <div id="test" style="display: none;">TESTS JSON</div>
-
         </div>
     </div>
 

@@ -100,6 +100,7 @@ $membreId1->execute();
 $idMembre1 = $membreId1->fetch(PDO::FETCH_ASSOC);
 
 if (isset($_POST['note']) && isset($_POST['commentaire'])) {
+    var_dump($_POST);
 
     $commentaire = trim($_POST['commentaire']);
     $note = $_POST['note'];
@@ -116,8 +117,9 @@ if (isset($_POST['note']) && isset($_POST['commentaire'])) {
         $erreur = true;
         $msg .= '<div class="alert alert-danger mb-3">Merci de bien vouloir mettre une note entre 1 et 5.</div>';
     }
-
+    
     if ($idMembre1['id1'] == $idMembre2) {
+       
         $erreur = true;
         $msg .= '<div class="alert alert-danger mb-3">Vous ne pouvez pas noter votre propre annonce</div>';
     }
@@ -130,7 +132,7 @@ if (isset($_POST['note']) && isset($_POST['commentaire'])) {
 
         $msg .= '<div class="alert alert-success mb-3">Votre avis à bien été pris en compte</div>';
     }
-    header('location:annonce.php?id_annonce=' . $_GET['id_annonce']);
+    
 }
 
 //-----------------------------------------------
@@ -148,8 +150,6 @@ if (isset($_POST['question'])) {
     }
 
     if ($idMembre1['id1'] == $idMembre2) {
-        var_dump($idMembre1['id1']);
-        var_dump($idMembre2);
         $erreur = true;
         $msg .= '<div class="alert alert-danger mb-3">Vous ne pouvez pas publier de question sur votre propre annonce</div>';
     }
@@ -165,12 +165,6 @@ $recupQuestion = $pdo->prepare("SELECT id_question, question_id, question, repon
 $recupQuestion->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
 $recupQuestion->execute();
 
-
-// $recupReponse = $pdo->prepare("SELECT reponse, DATE_FORMAT(date_enregistrement, '%d/%m/%Y') AS date, question_id FROM reponse WHERE question_id IN
-//     (SELECT question_id FROM question, annonce WHERE annonce_id = :id_annonce)");
-// $recupReponse->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
-// $recupReponse->execute();
-// $affichReponse = $recupReponse->fetch(PDO::FETCH_ASSOC);
 
 include 'inc/header.inc.php';
 include 'inc/nav.inc.php';
@@ -337,6 +331,48 @@ include 'inc/nav.inc.php';
                 <a class="btn" aria-current="page" href="index.php">Retour vers les annonces</a>
             </div>
         </div>
+        <!-- modal note -->
+        <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header row">
+                        <h4 class="modal-title" id="ModalLabel">Noter le vendeur</h4>
+                        <p>Cette note est basée sur la qualité des échanges et du relationnel</p>
+                        <?php echo $msg; ?>
+                    </div>
+                    <div class="modal-body">
+                        <?php if (user_connected() == false) {  ?>
+                            <div class="form-group col-12">
+                                <p>Afin de pouvoir ajouter une note, vous devez être connecté</p>
+                                <a class="btn d-flex align-items-center" aria-current="page" href="connexion.php?id_annonce=<?php echo $_GET['id_annonce']; ?>">Se connecter</a>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn closeWin" data-bs-dismiss="modal">Fermer</button>
+                            </div>
+                        <?php   } else { ?>
+                            <form id="noteForm" method="POST" class="row">
+                                <div class="form-group col-12">
+                                    <label for="note" class="form-label">Note</label>
+                                    <div class="stars">
+                                        <i class="far fa-star fa-2x" data-value="1"></i><i class="far fa-star fa-2x" data-value="2"></i><i class="far fa-star fa-2x" data-value="3"></i><i class="far fa-star fa-2x" data-value="4"></i><i class="far fa-star fa-2x" data-value="5"></i>
+                                    </div>
+                                    <input class="form-control d-none" type="text" name="note" id="note" value="0">
+                                </div>
+                                <div class="form-group col-12 mt-3">
+                                    <label for="commentaire" class="form-label">Votre avis</label>
+                                    <textarea class="form-control" id="commentaire" name="commentaire" value="<?php echo $commentaire ?>"></textarea>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn closeWin" data-bs-dismiss="modal">Fermer</button>
+                                    <button type="submit" class="btn" id="enregistrer" name="enregistrer">Valider</button>
+                                </div>
+                            </form>
+                        <?php   }  ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Fin modal note -->
         <!-- modal question -->
         <div class="modal fade" id="question" tabindex="-1" aria-labelledby="Modalquestion" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -371,53 +407,6 @@ include 'inc/nav.inc.php';
             </div>
         </div>
         <!-- modal question -->
-        <!-- modal note -->
-        <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header row">
-                        <h4 class="modal-title" id="ModalLabel">Noter le vendeur</h4>
-                        <p>Cette note est basée sur la qualité des échanges et du relationnel</p>
-                        <?php echo $msg; ?>
-                    </div>
-                    <div class="modal-body">
-                        <?php if (user_connected() == false) {  ?>
-                            <div class="form-group col-12">
-                                <p>Afin de pouvoir ajouter une note, vous devez être connecté</p>
-                                <a class="btn d-flex align-items-center" aria-current="page" href="connexion.php?id_annonce=<?php echo $_GET['id_annonce']; ?>"></i>Se connecter</a>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn closeWin" data-bs-dismiss="modal">Fermer</button>
-                            </div>
-                        <?php   } else { ?>
-                            <form id="noteForm" method="POST" action="" class="row">
-                                <div class="form-group col-12">
-                                    <label for="note" class="form-label">Note</label>
-                                    <div class="stars">
-                                        <i class="far fa-star fa-2x" data-value="1"></i><i class="far fa-star fa-2x" data-value="2"></i><i class="far fa-star fa-2x" data-value="3"></i><i class="far fa-star fa-2x" data-value="4"></i><i class="far fa-star fa-2x" data-value="5"></i>
-                                    </div>
-
-                                    <input class="form-control d-none" type="text" name="note" id="note" value="0">
-                                </div>
-                                <div class="form-group col-12 mt-3">
-                                    <label for="commentaire" class="form-label">Votre avis</label>
-                                    <textarea class="form-control" id="commentaire" name="commentaire" value="<?php echo $commentaire ?>"></textarea>
-                                </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn closeWin" data-bs-dismiss="modal">Fermer</button>
-                        <button type="submit" class="btn" id="enregistrer" name="enregistrer">Valider</button>
-                    </div>
-                    </form>
-                <?php   }  ?>
-                </div>
-            </div>
-        </div>
-        <!-- Fin modal note -->
-
-
-
-
 
     <?php } else {
         echo '<div class="alert alert-danger mb-3 text-center">Cette annonce est inconnue. Veuillez effectuer une recherche.</div>';

@@ -180,7 +180,7 @@ if (isset($_POST['categorie']) && isset($_POST['titre']) && isset($_POST['desc_l
         $recupCategorie->execute();
         $idCategorie = $recupCategorie->fetch(PDO::FETCH_ASSOC);
         $idCategorie = $idCategorie['categ'];
-        
+
 
         $enregistrement = $pdo->prepare("INSERT INTO annonce (titre, description_courte, description_longue, prix, photo, adresse, cp, ville, pays, membre_id, photo_id, categorie_id) VALUES (:titre, '" . $desc_courte . "', :desc_longue, :prix, '" . $photo_principale['photo1'] . "', :adresse, :cp, :ville, :pays, '" . $membre['membre'] . "', '" . $lastInsertID . "', '" . $idCategorie . "')");
         $enregistrement->bindParam(':titre', $titre, PDO::PARAM_STR);

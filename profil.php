@@ -17,194 +17,193 @@ if (isset($_GET['action']) && $_GET['action'] == 'modifier') {
     $modifAnnonce = $pdo->prepare("SELECT * FROM annonce, categorie WHERE id_annonce = :id_annonce AND id_categorie = categorie_id");
     $modifAnnonce->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
     $modifAnnonce->execute();
-    $annonceModif = $modifAnnonce->fetch(PDO::FETCH_ASSOC);       
-                 
-    $recupPhoto = $pdo->prepare("SELECT * FROM photo, annonce WHERE id_annonce = :id_annonce AND id_photo = photo_id");
-    $recupPhoto->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
-    $recupPhoto->execute();
-    $photo = $recupPhoto->fetch(PDO::FETCH_ASSOC);     
-
-    if (isset($_POST['categorie']) && isset($_POST['titre']) && isset($_POST['desc_longue']) && isset($_POST['prix']) && isset($_POST['adresse']) && isset($_POST['cp']) && isset($_POST['ville']) && isset($_POST['pays'])) {
-    $categorie = trim($_POST['categorie']);
-    $titre = trim($_POST['titre']);
-    $desc_longue = trim($_POST['desc_longue']);
-    $prix = trim($_POST['prix']);
-    $adresse = trim($_POST['adresse']);
-    $cp = trim($_POST['cp']);
-    $ville = trim($_POST['ville']);
-    $pays = trim($_POST['pays']);    
-
-    $erreur = false;
-
-    //picture
-
-    $tab_extension = array('jpg', 'jpeg', 'gif', 'png', 'webp');
-
-    if (!empty($_FILES['photo1']['name'])) {
-        $photo1 = date("Y-m-d H:i:s") . '-' . $_FILES['photo1']['name'];
-        $extension = substr(strrchr($photo1, '.'), 1);
-        $extension = strtolower($extension);
-        if (in_array($extension, $tab_extension)) {
-            $photo1 = str_replace(' ', '-', $photo1);
-            $photo1 = preg_replace('#[^A-Za-z0-9.\-]#', '', $photo1);
-            copy($_FILES['photo1']['tmp_name'], ROOT_PATH . PROJECT_PATH . 'assets/img/' . $photo1);
-        } else {
-            $erreur = true;
-            $msg .= '<div class="alert alert-danger mb-3">Attention! Format invalide. Les formats attendus sont jpg, jpeg, gif, png ou webp.</div>';
-        }
-    }
-    if (!empty($_FILES['photo2']['name'])) {
-        $photo2 = date("Y-m-d H:i:s") . '-' . $_FILES['photo2']['name'];
-        $extension = substr(strrchr($photo2, '.'), 1);
-        $extension = strtolower($extension);
-        if (in_array($extension, $tab_extension)) {
-            $photo2 = str_replace(' ', '-', $photo2);
-            $photo2 = preg_replace('#[^A-Za-z0-9.\-]#', '', $photo2);
-            copy($_FILES['photo2']['tmp_name'], ROOT_PATH . PROJECT_PATH . 'assets/img/' . $photo2);
-        } else {
-            $erreur = true;
-            $msg .= '<div class="alert alert-danger mb-3">Attention! Format invalide. Les formats attendus sont jpg, jpeg, gif, png ou webp.</div>';
-        }
-    }
-    if (!empty($_FILES['photo3']['name'])) {
-        $photo3 = date("Y-m-d H:i:s") . '-' . $_FILES['photo3']['name'];
-        $extension = substr(strrchr($photo3, '.'), 1);
-        $extension = strtolower($extension);
-        if (in_array($extension, $tab_extension)) {
-            $photo3 = str_replace(' ', '-', $photo3);
-            $photo3 = preg_replace('#[^A-Za-z0-9.\-]#', '', $photo3);
-            copy($_FILES['photo3']['tmp_name'], ROOT_PATH . PROJECT_PATH . 'assets/img/' . $photo3);
-        } else {
-            $erreur = true;
-            $msg .= '<div class="alert alert-danger mb-3">Attention! Format invalide. Les formats attendus sont jpg, jpeg, gif, png ou webp.</div>';
-        }
-    }
-    if (!empty($_FILES['photo4']['name'])) {
-        $photo4 = date("Y-m-d H:i:s") . '-' . $_FILES['photo4']['name'];
-        $extension = substr(strrchr($photo4, '.'), 1);
-        $extension = strtolower($extension);
-        if (in_array($extension, $tab_extension)) {
-            $photo4 = str_replace(' ', '-', $photo4);
-            $photo4 = preg_replace('#[^A-Za-z0-9.\-]#', '', $photo4);
-            copy($_FILES['photo4']['tmp_name'], ROOT_PATH . PROJECT_PATH . 'assets/img/' . $photo4);
-        } else {
-            $erreur = true;
-            $msg .= '<div class="alert alert-danger mb-3">Attention! Format invalide. Les formats attendus sont jpg, jpeg, gif, png ou webp.</div>';
-        }
-    }
-    if (!empty($_FILES['photo5']['name'])) {
-        $photo5 = date("Y-m-d H:i:s") . '-' . $_FILES['photo5']['name'];
-        $extension = substr(strrchr($photo5, '.'), 1);
-        $extension = strtolower($extension);
-        if (in_array($extension, $tab_extension)) {
-            $photo5 = str_replace(' ', '-', $photo5);
-            $photo5 = preg_replace('#[^A-Za-z0-9.\-]#', '', $photo5);
-            copy($_FILES['photo5']['tmp_name'], ROOT_PATH . PROJECT_PATH . 'assets/img/' . $photo5);
-        } else {
-            $erreur = true;
-            $msg .= '<div class="alert alert-danger mb-3">Attention! Format invalide. Les formats attendus sont jpg, jpeg, gif, png ou webp.</div>';
-        }
-    }
-    //price
-    if (!is_numeric($prix)) {
-        $erreur = true;
-        $prix = 0;
-        $msg .= '<div class="alert alert-danger mb-3">Attention! Le prix doit être renseigné .</div>';
-    }
-    //description
-    if (iconv_strlen($desc_longue) < 10) {
-        $erreur = true;
-        $msg .= '<div class="alert alert-danger mb-3">Attention la description est trop courte.</div>';
-    }
-    // titre
-    if (iconv_strlen($titre) < 5) {
-        $erreur = true;
-        $msg .= '<div class="alert alert-danger mb-3">Merci de bien vouloir préciser le titre</div>';
-    }
-    //cp format
-    $verif_cp = preg_match('$((0[1-9])|([1-8][0-9])|(9[0-8])|(2A)|(2B))[0-9]{3}$', $cp);
-    if ($verif_cp == false) {
-        $erreur = true;
-        $msg .= '<div class="alert alert-danger mb-3">Veuillez renseigner un code postal valide svp</div>';
-    }
-
-    // adresse
-    if ($adresse == '') {
-        $erreur = true;
-        $msg .= '<div class="alert alert-danger mb-3">Veuillez renseigner votre adresse svp</div>';
-    }    
-
-// annonce update;
-if ($erreur == false) {
-    //photos : table photo
-    if (!empty($_FILES['photo1']['name'])) {
-        $photo1_update = $pdo->prepare("UPDATE photo SET photo1 = :photo1 WHERE id_photo = '" . $photo['photo_id'] . "'");
-        $photo1_update->bindParam(':photo1', $photo1, PDO::PARAM_STR);
-        $photo1_update->execute();
-    }
-    if (!empty($_FILES['photo2']['name'])) {
-        $photo2_register = $pdo->prepare("UPDATE photo SET photo2 = :photo2 WHERE id_photo = '" . $photo['photo_id'] . "'");
-        $photo2_register->bindParam(':photo2', $photo2, PDO::PARAM_STR);
-        $photo2_register->execute();
-    }
-    if (!empty($_FILES['photo3']['name'])) {
-        $photo3_register = $pdo->prepare("UPDATE photo SET photo3 = :photo3 WHERE id_photo = '" . $photo['photo_id'] . "'");
-        $photo3_register->bindParam(':photo3', $photo3, PDO::PARAM_STR);
-        $photo3_register->execute();
-    }
-    if (!empty($_FILES['photo4']['name'])) {
-        $photo4_register = $pdo->prepare("UPDATE photo SET photo4 = :photo4 WHERE id_photo = '" . $photo['photo_id']. "'");
-        $photo4_register->bindParam(':photo4', $photo4, PDO::PARAM_STR);
-        $photo4_register->execute();
-    }
-    if (!empty($_FILES['photo5']['name'])) {
-        $photo5_register = $pdo->prepare("UPDATE photo SET photo5 = :photo5 WHERE id_photo = '" . $photo['photo_id'] . "'");
-        $photo5_register->bindParam(':photo5', $photo2, PDO::PARAM_STR);
-        $photo5_register->execute();
-    }
-    
-    $desc_courte = substr($desc_longue, 0, 50);
-
-    $recupCategorie = $pdo->prepare("SELECT id_categorie AS categ FROM categorie WHERE categorie = :categorie");
-    $recupCategorie->bindParam(':categorie', $categorie, PDO::PARAM_STR);
-    $recupCategorie->execute();
-    $idCategorie = $recupCategorie->fetch(PDO::FETCH_ASSOC);
-    $idCategorie = $idCategorie['categ'];    
+    $annonceModif = $modifAnnonce->fetch(PDO::FETCH_ASSOC);
 
     $recupPhoto = $pdo->prepare("SELECT * FROM photo, annonce WHERE id_annonce = :id_annonce AND id_photo = photo_id");
     $recupPhoto->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
     $recupPhoto->execute();
     $photo = $recupPhoto->fetch(PDO::FETCH_ASSOC);
 
+    if (isset($_POST['categorie']) && isset($_POST['titre']) && isset($_POST['desc_longue']) && isset($_POST['prix']) && isset($_POST['adresse']) && isset($_POST['cp']) && isset($_POST['ville']) && isset($_POST['pays'])) {
+        $categorie = trim($_POST['categorie']);
+        $titre = trim($_POST['titre']);
+        $desc_longue = trim($_POST['desc_longue']);
+        $prix = trim($_POST['prix']);
+        $adresse = trim($_POST['adresse']);
+        $cp = trim($_POST['cp']);
+        $ville = trim($_POST['ville']);
+        $pays = trim($_POST['pays']);
 
-    $majAnnonce = $pdo->prepare("UPDATE annonce SET titre = :titre, description_courte =  '" . $desc_courte . "', description_longue = :desc_longue, prix = :prix, photo = '" . $photo['photo1'] . "', adresse = :adresse, cp = :cp, ville = :ville, pays = :pays, membre_id = '". $annonceModif['membre_id'] ."' , photo_id =  '" . $photo['photo_id'] . "', categorie_id = '" . $idCategorie . "' WHERE id_annonce = :id_annonce");
-    $majAnnonce->bindParam(':titre', $titre, PDO::PARAM_STR);
-    $majAnnonce->bindParam(':desc_longue', $desc_longue, PDO::PARAM_STR);
-    $majAnnonce->bindParam(':prix', $prix, PDO::PARAM_STR);
-    $majAnnonce->bindParam(':adresse', $adresse, PDO::PARAM_STR);
-    $majAnnonce->bindParam(':cp', $cp, PDO::PARAM_STR);
-    $majAnnonce->bindParam(':ville', $ville, PDO::PARAM_STR);
-    $majAnnonce->bindParam(':pays', $pays, PDO::PARAM_STR);
-    $majAnnonce->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
-    $majAnnonce->execute();
-    header('location:profil.php');
-    }    
-}
+        $erreur = false;
+
+        //picture
+
+        $tab_extension = array('jpg', 'jpeg', 'gif', 'png', 'webp');
+
+        if (!empty($_FILES['photo1']['name'])) {
+            $photo1 = date("Y-m-d H:i:s") . '-' . $_FILES['photo1']['name'];
+            $extension = substr(strrchr($photo1, '.'), 1);
+            $extension = strtolower($extension);
+            if (in_array($extension, $tab_extension)) {
+                $photo1 = str_replace(' ', '-', $photo1);
+                $photo1 = preg_replace('#[^A-Za-z0-9.\-]#', '', $photo1);
+                copy($_FILES['photo1']['tmp_name'], ROOT_PATH . PROJECT_PATH . 'assets/img/' . $photo1);
+            } else {
+                $erreur = true;
+                $msg .= '<div class="alert alert-danger mb-3">Attention! Format invalide. Les formats attendus sont jpg, jpeg, gif, png ou webp.</div>';
+            }
+        }
+        if (!empty($_FILES['photo2']['name'])) {
+            $photo2 = date("Y-m-d H:i:s") . '-' . $_FILES['photo2']['name'];
+            $extension = substr(strrchr($photo2, '.'), 1);
+            $extension = strtolower($extension);
+            if (in_array($extension, $tab_extension)) {
+                $photo2 = str_replace(' ', '-', $photo2);
+                $photo2 = preg_replace('#[^A-Za-z0-9.\-]#', '', $photo2);
+                copy($_FILES['photo2']['tmp_name'], ROOT_PATH . PROJECT_PATH . 'assets/img/' . $photo2);
+            } else {
+                $erreur = true;
+                $msg .= '<div class="alert alert-danger mb-3">Attention! Format invalide. Les formats attendus sont jpg, jpeg, gif, png ou webp.</div>';
+            }
+        }
+        if (!empty($_FILES['photo3']['name'])) {
+            $photo3 = date("Y-m-d H:i:s") . '-' . $_FILES['photo3']['name'];
+            $extension = substr(strrchr($photo3, '.'), 1);
+            $extension = strtolower($extension);
+            if (in_array($extension, $tab_extension)) {
+                $photo3 = str_replace(' ', '-', $photo3);
+                $photo3 = preg_replace('#[^A-Za-z0-9.\-]#', '', $photo3);
+                copy($_FILES['photo3']['tmp_name'], ROOT_PATH . PROJECT_PATH . 'assets/img/' . $photo3);
+            } else {
+                $erreur = true;
+                $msg .= '<div class="alert alert-danger mb-3">Attention! Format invalide. Les formats attendus sont jpg, jpeg, gif, png ou webp.</div>';
+            }
+        }
+        if (!empty($_FILES['photo4']['name'])) {
+            $photo4 = date("Y-m-d H:i:s") . '-' . $_FILES['photo4']['name'];
+            $extension = substr(strrchr($photo4, '.'), 1);
+            $extension = strtolower($extension);
+            if (in_array($extension, $tab_extension)) {
+                $photo4 = str_replace(' ', '-', $photo4);
+                $photo4 = preg_replace('#[^A-Za-z0-9.\-]#', '', $photo4);
+                copy($_FILES['photo4']['tmp_name'], ROOT_PATH . PROJECT_PATH . 'assets/img/' . $photo4);
+            } else {
+                $erreur = true;
+                $msg .= '<div class="alert alert-danger mb-3">Attention! Format invalide. Les formats attendus sont jpg, jpeg, gif, png ou webp.</div>';
+            }
+        }
+        if (!empty($_FILES['photo5']['name'])) {
+            $photo5 = date("Y-m-d H:i:s") . '-' . $_FILES['photo5']['name'];
+            $extension = substr(strrchr($photo5, '.'), 1);
+            $extension = strtolower($extension);
+            if (in_array($extension, $tab_extension)) {
+                $photo5 = str_replace(' ', '-', $photo5);
+                $photo5 = preg_replace('#[^A-Za-z0-9.\-]#', '', $photo5);
+                copy($_FILES['photo5']['tmp_name'], ROOT_PATH . PROJECT_PATH . 'assets/img/' . $photo5);
+            } else {
+                $erreur = true;
+                $msg .= '<div class="alert alert-danger mb-3">Attention! Format invalide. Les formats attendus sont jpg, jpeg, gif, png ou webp.</div>';
+            }
+        }
+        //price
+        if (!is_numeric($prix)) {
+            $erreur = true;
+            $prix = 0;
+            $msg .= '<div class="alert alert-danger mb-3">Attention! Le prix doit être renseigné .</div>';
+        }
+        //description
+        if (iconv_strlen($desc_longue) < 10) {
+            $erreur = true;
+            $msg .= '<div class="alert alert-danger mb-3">Attention la description est trop courte.</div>';
+        }
+        // titre
+        if (iconv_strlen($titre) < 5) {
+            $erreur = true;
+            $msg .= '<div class="alert alert-danger mb-3">Merci de bien vouloir préciser le titre</div>';
+        }
+        //cp format
+        $verif_cp = preg_match('$((0[1-9])|([1-8][0-9])|(9[0-8])|(2A)|(2B))[0-9]{3}$', $cp);
+        if ($verif_cp == false) {
+            $erreur = true;
+            $msg .= '<div class="alert alert-danger mb-3">Veuillez renseigner un code postal valide svp</div>';
+        }
+
+        // adresse
+        if ($adresse == '') {
+            $erreur = true;
+            $msg .= '<div class="alert alert-danger mb-3">Veuillez renseigner votre adresse svp</div>';
+        }
+
+        // annonce update;
+        if ($erreur == false) {
+            //photos : table photo
+            if (!empty($_FILES['photo1']['name'])) {
+                $photo1_update = $pdo->prepare("UPDATE photo SET photo1 = :photo1 WHERE id_photo = '" . $photo['photo_id'] . "'");
+                $photo1_update->bindParam(':photo1', $photo1, PDO::PARAM_STR);
+                $photo1_update->execute();
+            }
+            if (!empty($_FILES['photo2']['name'])) {
+                $photo2_register = $pdo->prepare("UPDATE photo SET photo2 = :photo2 WHERE id_photo = '" . $photo['photo_id'] . "'");
+                $photo2_register->bindParam(':photo2', $photo2, PDO::PARAM_STR);
+                $photo2_register->execute();
+            }
+            if (!empty($_FILES['photo3']['name'])) {
+                $photo3_register = $pdo->prepare("UPDATE photo SET photo3 = :photo3 WHERE id_photo = '" . $photo['photo_id'] . "'");
+                $photo3_register->bindParam(':photo3', $photo3, PDO::PARAM_STR);
+                $photo3_register->execute();
+            }
+            if (!empty($_FILES['photo4']['name'])) {
+                $photo4_register = $pdo->prepare("UPDATE photo SET photo4 = :photo4 WHERE id_photo = '" . $photo['photo_id'] . "'");
+                $photo4_register->bindParam(':photo4', $photo4, PDO::PARAM_STR);
+                $photo4_register->execute();
+            }
+            if (!empty($_FILES['photo5']['name'])) {
+                $photo5_register = $pdo->prepare("UPDATE photo SET photo5 = :photo5 WHERE id_photo = '" . $photo['photo_id'] . "'");
+                $photo5_register->bindParam(':photo5', $photo2, PDO::PARAM_STR);
+                $photo5_register->execute();
+            }
+
+            $desc_courte = substr($desc_longue, 0, 50);
+
+            $recupCategorie = $pdo->prepare("SELECT id_categorie AS categ FROM categorie WHERE categorie = :categorie");
+            $recupCategorie->bindParam(':categorie', $categorie, PDO::PARAM_STR);
+            $recupCategorie->execute();
+            $idCategorie = $recupCategorie->fetch(PDO::FETCH_ASSOC);
+            $idCategorie = $idCategorie['categ'];
+
+            $recupPhoto = $pdo->prepare("SELECT * FROM photo, annonce WHERE id_annonce = :id_annonce AND id_photo = photo_id");
+            $recupPhoto->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
+            $recupPhoto->execute();
+            $photo = $recupPhoto->fetch(PDO::FETCH_ASSOC);
+
+
+            $majAnnonce = $pdo->prepare("UPDATE annonce SET titre = :titre, description_courte =  '" . $desc_courte . "', description_longue = :desc_longue, prix = :prix, photo = '" . $photo['photo1'] . "', adresse = :adresse, cp = :cp, ville = :ville, pays = :pays, membre_id = '" . $annonceModif['membre_id'] . "' , photo_id =  '" . $photo['photo_id'] . "', categorie_id = '" . $idCategorie . "' WHERE id_annonce = :id_annonce");
+            $majAnnonce->bindParam(':titre', $titre, PDO::PARAM_STR);
+            $majAnnonce->bindParam(':desc_longue', $desc_longue, PDO::PARAM_STR);
+            $majAnnonce->bindParam(':prix', $prix, PDO::PARAM_STR);
+            $majAnnonce->bindParam(':adresse', $adresse, PDO::PARAM_STR);
+            $majAnnonce->bindParam(':cp', $cp, PDO::PARAM_STR);
+            $majAnnonce->bindParam(':ville', $ville, PDO::PARAM_STR);
+            $majAnnonce->bindParam(':pays', $pays, PDO::PARAM_STR);
+            $majAnnonce->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
+            $majAnnonce->execute();
+            header('location:profil.php');
+        }
+    }
 }
 
 // Suppresssion des annonces 
 
-if (isset($_GET['action']) && $_GET['action'] == 'supprimer' && !empty($_GET['id_annonce'])) {  
+if (isset($_GET['action']) && $_GET['action'] == 'supprimer' && !empty($_GET['id_annonce'])) {
     $supprPhoto  = $pdo->prepare("SELECT id_photo FROM photo, annonce WHERE id_photo = photo_id AND id_annonce = :id_annonce");
     $supprPhoto->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
     $supprPhoto->execute();
     $delPhoto = $supprPhoto->fetch(PDO::FETCH_ASSOC);
-    $photoSuppr  = $pdo->prepare("DELETE FROM photo WHERE id_photo = '".$delPhoto['id_photo']."'");            
-     
+    $photoSuppr  = $pdo->prepare("DELETE FROM photo WHERE id_photo = '" . $delPhoto['id_photo'] . "'");
+
     $suppressionAnnonce = $pdo->prepare("DELETE FROM annonce WHERE id_annonce = :id_annonce");
     $suppressionAnnonce->bindParam(':id_annonce', $_GET['id_annonce'], PDO::PARAM_STR);
-    $suppressionAnnonce->execute();  
-    
+    $suppressionAnnonce->execute();
 }
 
 
@@ -237,7 +236,6 @@ if (isset($_POST['reponse'])) {
     $validReponse->execute();
     header('location:profil.php');
 }
-
 //Formulaire coordonnées
 if (isset($_POST['telephone']) && isset($_POST['email']) && isset($_POST['adresse']) && isset($_POST['cp']) && isset($_POST['ville']) && isset($_POST['pays'])) {
     $telephone =  trim($_POST['telephone']);
@@ -304,22 +302,44 @@ if (isset($_POST['telephone']) && isset($_POST['email']) && isset($_POST['adress
     }
 }
 // modification mdp
-if (isset($_POST['mdp'])) {
+if (isset($_POST['mdp']) && isset($_POST['oldmdp'])) {
     $mdp = trim($_POST['mdp']);
+    $oldmdp = trim($_POST['oldmdp']);
     $erreur = false;
-    if (iconv_strlen($_POST['mdp']) < 6) {
-        $erreur = true;
-        $msg .= '<p class="alert alert-danger mb-3">Attention le mot de passe doit contenir au moins 6 caractères.</p>';
-    }
-    if ($erreur == false) {
-        $mdp = password_hash($mdp, PASSWORD_DEFAULT);
-        $enregistrement = $pdo->prepare("UPDATE membre SET mdp = :mdp WHERE pseudo = '" . $pseudo . "'");
-        $enregistrement->bindParam(':mdp', $mdp, PDO::PARAM_STR);
-        $enregistrement->execute();
-        session_destroy();
-        header('location:connexion.php');
+
+    $verif = $pdo->prepare("SELECT mdp FROM membre WHERE pseudo = :pseudo");
+    $verif->bindParam(':pseudo', $pseudo, PDO::PARAM_STR);
+    $verif->execute();
+
+    $verif_mdp = $verif->fetch(PDO::FETCH_ASSOC);
+
+    if (password_verify($oldmdp, $verif_mdp['mdp'])) {
+
+        if (iconv_strlen($_POST['mdp']) < 6) {
+            $erreur = true;
+            $msg .= '<p class="alert alert-danger mb-3">Attention le mot de passe doit contenir au moins 6 caractères.</p>';
+        }
+        if ($erreur == false) {
+            $mdp = password_hash($mdp, PASSWORD_DEFAULT);
+            $enregistrement = $pdo->prepare("UPDATE membre SET mdp = :mdp WHERE pseudo = '" . $pseudo . "'");
+            $enregistrement->bindParam(':mdp', $mdp, PDO::PARAM_STR);
+            $enregistrement->execute();
+            session_destroy();
+            header('location:connexion.php');
+        }
+    } else {
+        $erreur = true;        
+        $msg .= '<p class="alert alert-danger mb-3">Attention! votre mot de passe est incorrect.</p>';
     }
 }
+
+
+
+
+
+
+
+
 
 $coordonnes_req = $pdo->query("SELECT email AS email, telephone AS telephone, adresse AS adresse, cp AS cp, ville AS ville, pays AS pays FROM membre WHERE pseudo = '" . $pseudo . "'");
 $coordonnes = $coordonnes_req->fetch(PDO::FETCH_ASSOC);
@@ -351,6 +371,7 @@ include 'inc/nav.inc.php';
                                     ?>
 
         </p>
+        <?php echo $msg; ?>
     </div>
 
     <!-- Avatar -->
@@ -474,19 +495,21 @@ include 'inc/nav.inc.php';
                 <div class="modal-content">
                     <div class="modal-header row">
                         <h4 class="modal-title" id="ModalLabel">Changer votre mot de passe</h4>
-                        <p>Votre mot de passe doit avoir au moins 6 caractères</p>
+                        <p>Votre nouveau mot de passe doit avoir au moins 6 caractères</p>
                         <?php echo $msg; ?>
                     </div>
                     <div class="modal-body">
-                        <form id="profilForm" method="POST" action="" class="row">
+                        <form id="profilForm" method="POST"  class="row">
                             <div class="form-group col-12">
+                                <label for="oldmdp" class="form-label">Votre mot de passe actuel</label>
+                                <input type="text" class="form-control" id="oldmdp" name="oldmdp">
                                 <label for="mdp" class="form-label">Votre nouveau mot de passe</label>
-                                <input type="text" class="form-control" id="mdp" name="mdp">
+                                <input type="password" class="form-control" id="mdp" name="mdp">
                             </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn closeWin" data-bs-dismiss="modal">Fermer</button>
-                        <button type="submit" class="btn" id="enregistrer" name="enregistrer">Enregistrer</button>
+                        <button type="submit" class="btn" id="register" name="register">Enregistrer</button>
                     </div>
                     </form>
                 </div>
@@ -601,15 +624,16 @@ include 'inc/nav.inc.php';
                         <div>
                             <label for="categorie" class="form-label">Modifier la catégorie</label>
                             <select class="form-control" id="categorie" name="categorie">
-                                <?php 
-                               
+                                <?php
+
                                 while ($categorie = $liste_categorie->fetch(PDO::FETCH_ASSOC)) {
-                                    
+
                                     $categorie = $categorie['categorie'];
-                                    if ( $categorie == $annonceModif['categorie'] ) {
-                                    echo '<option selected value="' . $categorie . '">' . $categorie . '</option>';
-                                    }else{echo '<option value="' . $categorie . '">' . $categorie . '</option>';}
-                                    
+                                    if ($categorie == $annonceModif['categorie']) {
+                                        echo '<option selected value="' . $categorie . '">' . $categorie . '</option>';
+                                    } else {
+                                        echo '<option value="' . $categorie . '">' . $categorie . '</option>';
+                                    }
                                 } ?>
                             </select>
                         </div>
@@ -637,7 +661,7 @@ include 'inc/nav.inc.php';
                         </div>
                         <div>
                             <label for="desc_longue" class="form-label">Modifier la description</label>
-                            <textarea class="form-control" id="desc_longue" name="desc_longue" rows="4" ><?php echo $annonceModif['description_longue']; ?></textarea>
+                            <textarea class="form-control" id="desc_longue" name="desc_longue" rows="4"><?php echo $annonceModif['description_longue']; ?></textarea>
                         </div>
                         <div>
                             <label for="prix" class="form-label">Modifier le prix</label>
@@ -649,7 +673,7 @@ include 'inc/nav.inc.php';
                         </div>
                         <div class="form-group col-3">
                             <label for="cp">Code Postal</label>
-                            <input type="text" class="form-control" id="cp" name="cp" value="<?php echo $annonceModif['cp']; ?>">                            
+                            <input type="text" class="form-control" id="cp" name="cp" value="<?php echo $annonceModif['cp']; ?>">
                         </div>
                         <div class="form-group col-9">
                             <label for="ville">Ville</label>
@@ -663,18 +687,18 @@ include 'inc/nav.inc.php';
                             <button type="submit" class="btn" id="enregistrer" name="enregistrer">Mettre à jour</button>
                         </div>
                     </form>
-                </div>  
+                </div>
 
 
-<?php } ?>
-<div class="d-flex justify-content-center my-3">
-    <a class="btn " aria-current="page" href="deposer_annonce.php">Publier une annonce</a>
-</div>
+            <?php } ?>
+            <div class="d-flex justify-content-center my-3">
+                <a class="btn " aria-current="page" href="deposer_annonce.php">Publier une annonce</a>
+            </div>
 
-</div>
+        </div>
 
-</div>
-</div>
+    </div>
+    </div>
 </main>
 
 <?php
