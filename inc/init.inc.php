@@ -10,6 +10,7 @@ $options = array(
 $pdo = new PDO($host, $login, $password, $options);
 
 $msg = '';
+$msgOk = '';
 
 session_start();
 

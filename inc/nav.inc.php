@@ -1,3 +1,14 @@
+<?php
+
+
+$recherche = '';
+if (isset($_GET['rechercher'])) {
+    $recherche = trim($_GET['rechercher']);
+    header('location:' . URL . 'index.php?recherche=' . $recherche);
+}
+
+?>
+
 <nav class="navbar navbar-expand-md navbar-light fixed-top">
     <div class="container-fluid">
         <a class="navbar-brand" href="<?php echo URL; ?>index.php">
@@ -12,8 +23,13 @@
                 <li class="nav-item me-3">
                     <a class="btn d-flex align-items-center" aria-current="page" href="deposer_annonce.php"><i class="me-2 far fa-plus-square fa-2x"></i> Déposer une annonce</a>
                 </li>
-                <li class="nav-item me-3">
-                    <a class="nav-link d-flex align-items-center" aria-current="page" href="rechercher.php"><i class="me-2 fas fa-search fa-2x"></i> Rechercher</a>
+                <li class="nav-item mt-1 me-3">
+                    <form method="GET" class="d-flex">
+                        <input id="rechercher" name="rechercher" class="form-control me-2" type="search" list="datalistOptions" placeholder="Rechercher" aria-label="Search">
+                        <datalist id="datalistOptions">
+                        <button class="btn d-flex align-items-center" type="submit"><i class="me-2 fas fa-search"></i></button>
+
+                    </form>
                 </li>
             </ul>
             <ul class="navbar-nav  mb-2 mb-lg-0">
@@ -21,11 +37,11 @@
                     <li class="nav-item dropdown me-3">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown03" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user-cog"></i> Administration</a>
                         <div class="dropdown-menu" aria-labelledby="dropdown03">
-                            <a class="dropdown-item" href="<?php echo URL; ?>admin/gestion_annonces.php">Gestion des annonces</a>
-                            <a class="dropdown-item" href="<?php echo URL; ?>admin/gestion_catégories.php">Gestion des catégories</a>
-                            <a class="dropdown-item" href="<?php echo URL; ?>admin/gestion_membres.php">Gestion des membres</a>
-                            <a class="dropdown-item" href="<?php echo URL; ?>admin/gestion_commentaires.php">Gestions des commentaires</a>
-                            <a class="dropdown-item" href="<?php echo URL; ?>admin/gestion_notes.php">Gestions des notes</a>
+                            <a class="dropdown-item" href="<?php echo URL; ?>admin/gestion_annonce.php">Gestion des annonces</a>
+                            <a class="dropdown-item" href="<?php echo URL; ?>admin/gestion_categorie.php">Gestion des catégories</a>
+                            <a class="dropdown-item" href="<?php echo URL; ?>admin/gestion_membre.php">Gestion des membres</a>
+                            <a class="dropdown-item" href="<?php echo URL; ?>admin/gestion_question_reponse.php">Gestions des questions & réponses</a>
+                            <a class="dropdown-item" href="<?php echo URL; ?>admin/gestion_note.php">Gestions des notes</a>
                             <a class="dropdown-item" href="<?php echo URL; ?>admin/statistiques.php">Statistiques</a>
                         </div>
                     </li>
